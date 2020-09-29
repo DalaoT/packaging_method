@@ -31,9 +31,9 @@
             return false;
           }
           this.queryCondition.kdnum = code //要更改的值变成扫码枪的值 this.queryCondition.kdnum可以改成需要更改的值
-          this.moreClick()
-          this.trackOrder(true)
-          code = "";
+          this.moreClick() //我自己的方法
+          this.trackOrder(true) //我自己的搜索方法
+          code = ""; //清空值
         }
       }
     }
