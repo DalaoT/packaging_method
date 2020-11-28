@@ -1,25 +1,33 @@
-   //页面加载完执行事件
+    //页面加载完执行事件
     window.onload = (e) => {
       var code = "";
       var lastTime, nextTime;
       var lastCode, nextCode;
       //用户按下按键执行
       document.onkeydown = (e) => {
+
         // 保存按键码
         nextCode = e.which;
+
+        // 设置跳过的特殊字段
+        if (nextCode == 16) {
+          return
+        }
+
         //保存按键时间
         nextTime = new Date().getTime();
-        // 如果按键码不为空 且 上一次按键码也不为空 且 两次按键激活时间小等于30毫秒
+        // 如果按键码不为空 且 上一次按键码也不为空 且 两次按键激活时间小等于30毫秒 且不为特殊值
         if (lastCode != null && lastTime != null && nextTime - lastTime <= 30) {
           // code值加上当前按下的值并保存
-          code += String.fromCharCode(lastCode);
+          code += lastCode;
+          console.log(lastCode);
           // 如果两次按键激活时间大于100毫秒
         } else if (lastCode != null && lastTime != null && nextTime - lastTime > 100) {
           // 清除code值
           code = "";
         }
         // 保存这次按键码
-        lastCode = nextCode;
+        lastCode = e.key;
         // 保存这次按键时间
         lastTime = nextTime;
         //如果用户按下回车
@@ -30,9 +38,8 @@
             //返回false
             return false;
           }
-          this.queryCondition.kdnum = code //要更改的值变成扫码枪的值 this.queryCondition.kdnum可以改成需要更改的值
-          this.moreClick() //我自己的方法
-          this.trackOrder(true) //我自己的搜索方法
+          this.kdnum = code //要更改的值变成扫码枪的值 this.queryCondition.kdnum可以改成需要更改的值
+          this.readingData(code) //我自己的方法
           code = ""; //清空值
         }
       }
