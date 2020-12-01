@@ -1,5 +1,5 @@
     //页面加载完执行事件
-    window.onload = (e) => {
+    window.onload = (e) => {  //vue中这里改为 created 生命周期
       var code = "";
       var lastTime, nextTime;
       var lastCode, nextCode;
