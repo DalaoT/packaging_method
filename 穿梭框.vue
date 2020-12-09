@@ -1,18 +1,18 @@
 <template>
   <div>
-          <div class="ta-transfer">
+             <div class="ta-transfer">
         <div class="ta-transfer_left">
           <div class="transfer-view-head">
             <div class="head_left">
               <el-checkbox :indeterminate="isIndeterminate"
                            v-model="checkAll"
-                           @change="handleCheckAllChange">ta-transfer</el-checkbox>
+                           @change="handleCheckAllChange($event)">待打包物品</el-checkbox>
 
             </div>
             <div class="head_right">
-              <span>0</span>
+              <span>{{selected_num}}</span>
               <span>/</span>
-              <span>10</span>
+              <span>{{dataAll.length}}</span>
             </div>
 
           </div>
@@ -22,32 +22,52 @@
               <div class="transfer-view-item"
                    v-for="(item, index) in allData"
                    :key="index">
-                <el-checkbox :label="item.name"
-                             :key="item.id">{{item.name}}</el-checkbox>
+                <el-checkbox :label="item.id"
+                             :key="item.name">{{item.name}}</el-checkbox>
               </div>
             </el-checkbox-group>
           </div>
         </div>
-        <div class="ta-transfer_btn">
 
+        <div class="ta-transfer_btn">
+          <el-button type="primary"
+                     :disabled='bgData[0].parameter.selected_num==0'
+                     @click="removeGoods"
+                     icon="el-icon-arrow-left">拿出</el-button>
+          <el-button type="primary"
+                     :disabled='selected_num==0'
+                     @click='addRemoveGoods(0)'>放入
+            <i class="el-icon-arrow-right el-icon--right"></i>
+          </el-button>
         </div>
+
         <div class="ta-transfer_right">
           <div class="transfer-view-head">
             <div class="head_left">
-              <el-checkbox :indeterminate="isIndeterminate"
-                           v-model="checkAll"
-                           @change="handleCheckAllChange">
-                ta-transfer
+              <!-- :disabled='bgData[0].wpinfo.length==0' -->
+              <el-checkbox :indeterminate="bgData[0].parameter.isIndeterminate"
+                           v-model="bgData[0].parameter.checkAll"
+                           @change="handleCheckAllChange($event,0)">
+                包裹1
               </el-checkbox>
             </div>
             <div class="head_right">
-              <span>0</span>
+              <span>{{bgData[0].parameter.selected_num}}</span>
               <span>/</span>
-              <span>10</span>
+              <span>{{bgData[0].wpinfo.length}}</span>
             </div>
           </div>
           <div class="transfer-view-main">
+            <el-checkbox-group v-model="bgData[0].parameter.checkedCities"
+                               @change="handleCheckedCitiesChange($event,0)">
+              <div class="transfer-view-item"
+                   v-for="(item, index) in bgData[0].wpinfo"
+                   :key="index">
 
+                <el-checkbox :label="item.id"
+                             :key="item.name">{{item.name}}</el-checkbox>
+              </div>
+            </el-checkbox-group>
           </div>
         </div>
       </div>
