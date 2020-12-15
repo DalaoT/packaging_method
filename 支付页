@@ -1,0 +1,272 @@
+<template>
+	<view class="payment">
+<!-- 		<view class="payment_title">
+			<text>正在支付中</text>
+		</view>
+		<view class="payment_btn">
+			<u-loading mode="circle" size="100" color='#8a6913'></u-loading>
+			<u-button :custom-style="{marginTop:'10px'}" size='mini' type="success">我 已 支 付</u-button>
+		</view> -->
+		<view class="payAccording">
+			<view class="payAccording_main">
+				<view class="payAccording_left">
+						<u-loading size='80'  color="#8a6913" mode="circle"></u-loading>
+				</view>
+				<view class="payAccording_right">
+					<view class="payAccording_title">
+						正在支付！
+					</view>
+					<view class="payAccording_info">
+						请在微信支付
+					</view>
+				</view>
+			</view>
+
+		</view>
+		<view class="payInfo">
+			<view class="payInfo_top">
+				<text>
+					<text class="symbol">￥</text>
+					<text class="money">150.50</text>
+				</text>
+			</view>
+			<view class="payInfo_bottom">
+
+				<view class="payInfo_bottom_item">
+					<text class="item_title">选择线路:</text>
+					<text class="item_content">欧洲铁路</text>
+				</view>
+				<view class="payInfo_bottom_item">
+					<text class="item_title">线路时效:</text>
+					<text class="item_content">7-12天</text>
+				</view>
+				<view class="payInfo_bottom_item">
+					<text class="item_title">付款方式:</text>
+					<text class="item_content">微信付款</text>
+				</view>
+				<view class="payInfo_bottom_item">
+					<text class="item_title">订单状态:</text>
+					<text class="item_content">已付款待出库</text>
+				</view>
+				<view class="payInfo_bottom_item">
+					<text class="item_title">付款时间:</text>
+					<text class="item_content">2020-12-12 10:24:22</text>
+				</view>
+			</view>
+		<view class="payInfo_btn_view">
+			<u-button
+			ripple
+			 class='u-button'
+			 :custom-style="{
+				border:'0',
+				width:'200px',
+				letterSpacing:'2px',
+			}" :hair-line='false' shape="circle" >订单详情</u-button>
+			<view class="payInfo_btn_text">
+				点击按钮,进入订单详情查看更多信息
+			</view>
+		</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import {
+		apiWXPlay,
+		apiTestJSSDK,
+		apiWxPlay
+	} from '../../utils/request/api.js'
+	export default {
+		data() {
+			return {
+				orderid: '',
+				bjid: ''
+			};
+		},
+		methods: {
+			//微信配置
+			// async wx_playConfig(params) {
+			// 	let res = await apiTestJSSDK({
+			// 		jssdkurl: location.href.split('#')[0]
+			// 	})
+			// 	this.$wxjsd.config({
+			// 		debug: false, // 开启调试模式,
+			// 		appId: res.appId, // 必填，企业号的唯一标识，此处填写企业号corpid
+			// 		timestamp: res.timestamp, // 必填，生成签名的时间戳
+			// 		nonceStr: res.nonceStr, // 必填，生成签名的随机串
+			// 		signature: res.signature, // 必填，签名，见附录1
+			// 		jsApiList: ["checkJsApi", "chooseWXPay"] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+			// 	});
+			// 	wx.error(function(res) {
+			// 		alert("出错了：" + res.errMsg); //这个地方的好处就是wx.config配置错误，会弹出窗口哪里错误，然后根据微信文档查询即可。
+			// 	});
+			// },
+			async initiate_wx_play(params) {
+				let res = await apiWxPlay({
+					params,
+					done: 1,
+					type: 'wechat'
+				})
+				console.log(res.jspay);
+				WeixinJSBridge.invoke(
+					'getBrandWCPayRequest', {
+						"appId": res.jspay.appId, //公众号名称，由商户传入     
+						"timeStamp": res.jspay.timeStamp, //时间戳，自1970年以来的秒数     
+						"nonceStr": res.jspay.nonceStr, //随机串     
+						"package": res.jspay.package,
+						"signType": res.jspay.signType, //微信签名方式：     
+						"paySign": res.jspay.paySign //微信签名 
+					},
+					(res) => {
+						if (res.err_msg == "get_brand_wcpay_request:ok") {
+							console.log('支付成功');
+							apiWxPlay({
+								params,
+								type: 'wechat',
+								done: 1
+							}).then(res => {
+								console.log(res);
+							})
+						}
+					}
+				)
+			},
+			//
+			async getPaidInfo() {
+				let res = await apiWXPlay({
+					orderid: this.orderid,
+				})
+				this.initiate_wx_play(res.params)
+			}
+		},
+		onLoad() {
+			if (!window.windowPool[0].orderid) {
+				return this.$u.route({
+					url: 'pages/home_page/home_page',
+				})
+			}
+			console.log(window.windowPool);
+			this.orderid = window.windowPool[0].orderid
+			this.getPaidInfo()
+		}
+	}
+</script>
+
+<style lang="scss">
+	.payment {
+		width: 100%;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		background: url(../../static/images/image/xz.png) no-repeat;
+		background-size: 100%;
+		background-color: #f3f3f3;
+		.payAccording{
+			width: 100%;
+			height: 200px;
+			// background-color: pink;
+			display: flex;
+			justify-content: center;
+			align-items: flex-end;
+			.payAccording_main{
+				width: 230px;
+				height: 100px;
+				display: flex;
+				.payAccording_left{
+					width: 100px;
+					height: 100%;
+					background: url(../../static/images/image/bg.png) no-repeat;
+					background-size: 100%;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					.u-loading{
+						// box-shadow:  0 0 5px 1px $brown_text;
+						border-color: #f9d770 $brown_text  #f9d770 $brown_text!important;
+					}
+				}
+				.payAccording_right{
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					.payAccording_title{
+						font-size: 20px;
+						font-weight: 700;
+						color: #FFFFFF;
+					}
+					.payAccording_info{
+						color: #FFFFFF;
+						margin-top: 2px;
+					}
+				}
+			}
+		}
+.payInfo{
+	width: 95%;
+	min-height: 360px;
+	height: 45%;
+	background-color: pink;
+	background: url(../../static/images/image/bd.png) no-repeat;
+	background-size: 100% 100%;
+	.payInfo_top{
+		width: 100%;
+		height: 20%;
+		min-height: 140rpx;
+		margin-top: 60rpx;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		// background-color: pink;
+		font-size: 50rpx;
+		font-weight: 700;
+		color: #3F536E;
+		.symbol{
+			font-size: 20px;
+		}
+	}
+	.payInfo_bottom{
+		margin-top: 10px;
+		width: 100%;
+		font-size: 30rpx;
+		font-weight: 700;
+		.payInfo_bottom_item{
+			width: 100%;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			box-sizing: border-box;
+			padding-left: 20px;
+			.item_title{
+			margin-right: 10px;
+			color:#888888 ;
+			}
+			.item_content{
+				color:#3F536E;
+			}
+		}
+	}
+	.payInfo_btn_view{
+		width: 100%;
+		height: 100px;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		.u-button{
+			letter-spacing: 2px;
+			color: $brown_text;
+			box-shadow: -3px 20px 20px -10px #f9d770;
+			background:  linear-gradient(to right, #f9d770 ,#fbcc3f, #f9d770) ;
+		}
+		.payInfo_btn_text{
+			margin-top: 20px;
+			color: #CCCCCC;
+		}
+	}
+}
+	}
+</style>
